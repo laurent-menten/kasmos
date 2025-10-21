@@ -665,9 +665,16 @@ endstruc
 ;       LIMINE_REQUEST_HEADER LIMINE_BOOTLOADER_INFO_REQUEST_2, LIMINE_BOOTLOADER_INFO_REQUEST_3
 ;       dq 0                  ; revision
 ;       dq 0                  ; response pointer (bootloader will fill)
-%macro LIMINE_REQUEST_HEADER 2
-    dq LIMINE_COMMON_MAGIC_LO, LIMINE_COMMON_MAGIC_HI
-    dq %1, %2
+
+struc limine_request
+    .id        resq 4
+    .revision  resq 1
+endstruc
+
+%macro LIMINE_REQUEST_HEADER 2-3 0
+    at limine_request.id,       dq LIMINE_COMMON_MAGIC_LO, LIMINE_COMMON_MAGIC_HI, %1, %2
+    at limine_request.revision, dq %3                        
 %endmacro
+
 
 %endif ;__KASMOS_LIMNE_INC__

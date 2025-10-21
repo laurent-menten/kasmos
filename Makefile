@@ -51,6 +51,15 @@ DBG_CONFIG = -monitor none \
 	-chardev socket,id=dbg0,host=127.0.0.1,port=6668,server=on,wait=on \
 	-device isa-debugcon,iobase=0xe9,chardev=dbg0
 
+boot: iso
+	clear
+	$(QEMU_EXE) \
+		$(CPU_CONFIG) \
+		-cdrom $(ISO_FILE) \
+		-boot d \
+		-debugcon stdio
+		-no-reboot -no-shutdown 
+
 boot_test: iso
 	clear
 	$(QEMU_EXE) \

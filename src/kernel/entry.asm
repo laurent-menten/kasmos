@@ -11,6 +11,8 @@
 ; =
 ; =====================================================================================================================
 
+    extern vdebug_write_string
+
     extern kinit_run_all
     extern kfini_run_all
 
@@ -26,14 +28,20 @@
 
     LIMINE_BASE_REVISION 3
 
+
 _limine_mp_request:
     istruc limine_mp_request
-        at limine_mp_request.id,        dq LIMINE_COMMON_MAGIC_LO, LIMINE_COMMON_MAGIC_HI
-                                        dq LIMINE_MP_REQUEST_2, LIMINE_MP_REQUEST_3
-        at limine_mp_request.revision,  dq 0
+        LIMINE_REQUEST_HEADER                   LIMINE_MP_REQUEST_2, LIMINE_MP_REQUEST_3
 .response:
-        at limine_mp_request.response,  dq 0
-        at limine_mp_request.flags,     dq 0
+        at limine_mp_request.response,          dq 0
+        at limine_mp_request.flags,             dq 0
+    iend
+
+_limine_framebuffer_request:
+    istruc limine_framebuffer_request
+        LIMINE_REQUEST_HEADER                   LIMINE_FRAMEBUFFER_REQUEST_2, LIMINE_FRAMEBUFFER_REQUEST_3
+.response:
+        at limine_framebuffer_request.response, dq 0
     iend
 
     section .limine_requests_start
@@ -74,8 +82,8 @@ _limine_mp_request:
 
     global _kernel_entrypoint
 _kernel_entrypoint:
-    mov     al, 'A'
-    out     0x9E, al
+    mov rsi, hello
+    call vdebug_write_string
 
     call    kinit_run_all
 
@@ -86,3 +94,13 @@ _kernel_entrypoint:
 .hang:
     hlt
     jmp .hang
+
+    section .data
+
+; =====================================================================================================================
+; = 
+; =====================================================================================================================
+
+hello:
+    db 'kasmos booting...', 10, 0
+
