@@ -1,5 +1,4 @@
-/gdb
-/limine
-/llvm
-/nasm
-/qemu
+/bochs/
+/limine/
+/llvm/
+/nasm/

@@ -1,22 +1,23 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "name": "QEMU (gdbstub) - GDB",
-        "type": "cppdbg",
-        "request": "launch",
-        "program": "${workspaceFolder}/build/kernel.elf",
-        "cwd": "${workspaceFolder}",
-        "MIMode": "gdb",
-        "miDebuggerPath": "gdb",
-        "miDebuggerServerAddress": "localhost:1234",
-        "stopAtConnect": true,
-        "externalConsole": false,
-        "setupCommands": [
-          { "text": "-enable-pretty-printing" },
-          { "text": "set disassembly-flavor intel" },
-          { "text": "set pagination off" }
-        ]
-      }
-    ]
-  }
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "GDB remote (QEMU) — build, run, attach",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/kernel.elf",   // symboles
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "MIMode": "gdb",
+      "miDebuggerPath": "${workspaceFolder}/bin/gdb/bin/gdb",
+      "miDebuggerServerAddress": "localhost:17000",
+      "stopAtConnect": true,
+      "externalConsole": false,
+      "preLaunchTask": "Run QEMU/kasmos",
+      "postDebugTask": "",          // optionnel: tâche pour tuer QEMU
+      "setupCommands": [
+        { "description": "Désassembler la prochaine ligne", "text": "set disassemble-next-line on" }
+      ]
+    }
+  ]
+}

@@ -6,20 +6,31 @@
     bits    64
 
 ; =====================================================================================================================
-; = 
+; = vdebug_write_char =================================================================================================
 ; =====================================================================================================================
+;
+;   In:     al      ascii char to be written to VM debug port
+;
+;   Out:    /
+;
 
 FUNCTION vdebug_write_char
-    out 0xE9, al
+    out BOCHS_HACK_PORT, al
     ret
 
 ; =====================================================================================================================
-; = 
+; = vdebug_write_string ===============================================================================================
 ; =====================================================================================================================
+;
+;   In:     rsi     address of the asciiz string to be written to VM debug port
+;
+;   Out:    /
+;
 
 FUNCTION vdebug_write_string
     pushf
     push    rax
+    push    rsi
 
     cld
 
@@ -32,6 +43,125 @@ FUNCTION vdebug_write_string
     jmp     .loop
 
 .return:
+    pop     rsi
     pop     rax
     popf
+    ret
+
+; =====================================================================================================================
+; = vdebug_write_xdigit ===============================================================================================
+; =====================================================================================================================
+;
+;   In:     al      digit to be written (in hexadecimal) to VM debug port
+;
+;   Out:    /
+;
+
+FUNCTION vdebug_write_xdigit
+    push    rax
+    push    rbx
+
+    mov     rbx, vdebug_hex_table
+
+    and     al, 0x0F
+    xlat
+    call    vdebug_write_char
+
+    pop     rbx
+    pop     rax
+    ret
+
+RODATA vdebug_hex_table
+    db      "0123456789ABCDEF"
+
+; =====================================================================================================================
+; = 
+; =====================================================================================================================
+;
+;   In:     rax     digit to be written (in hexadecimal) to VM debug port
+;           cl      x
+;
+;   Out:    /
+;
+
+
+FUNCTION vdebug_write_word
+    push    rcx
+
+    mov     ch, cl
+    dec     cl
+    shl     cl, 4
+    ror     rax, cl
+
+    mov     cl, ch
+
+.loop:
+    call    vdebug_write_xdigit
+
+    rol     rax, 4
+
+    dec     cl
+    jnz     .loop
+
+    pop     rcx
+    ret
+
+FUNCTION vdebug_write_xword
+    push    rax
+    push    rbx
+
+    push    rax
+    shr     al, 8
+    call    vdebug_write_xdigit
+
+    pop     rax
+    call    vdebug_write_xdigit
+
+    pop     rbx
+    pop     rax
+    ret
+
+FUNCTION vdebug_write_xdword
+    push    rax
+    push    rbx
+
+    push    rax
+    shr     al, 16
+    call    vdebug_write_xword
+
+    pop     rax
+    call    vdebug_write_xword
+
+    pop     rbx
+    pop     rax
+    ret
+
+FUNCTION vdebug_write_xqword
+    push    rax
+    push    rbx
+
+    push    rax
+    shr     al, 32
+    call    vdebug_write_xdword
+
+    pop     rax
+    call    vdebug_write_xdword
+
+    pop     rbx
+    pop     rax
+    ret
+
+FUNCTION vdebug_write_xtword
+    push    rax
+    push    rbx
+
+    push    rax
+    mov     rax, rdx
+    call    vdebug_write_xqword
+
+    pop     rax
+    call    vdebug_write_xqword
+
+    pop     rbx
+    pop     rax
     ret

@@ -5,8 +5,8 @@ import socket, threading, queue, time, sys, tkinter as tk
 from tkinter import ttk, messagebox
 
 # Defaults
-SER0_HOST, SER0_PORT = "127.0.0.1", 6667
-DBG0_HOST, DBG0_PORT = "127.0.0.1", 6668
+SER0_HOST, SER0_PORT = "127.0.0.1", 17001
+DBG0_HOST, DBG0_PORT = "127.0.0.1", 17002
 RECONNECT_DELAY_SEC, RECV_BUF = 1.0, 4096
 
 # ---------------- Networking ----------------

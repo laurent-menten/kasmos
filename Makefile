@@ -7,10 +7,12 @@ export KASMOS_DIR = $(abspath .)
 include $(KASMOS_DIR)/Makefile.rules
 
 all:
+	$(MAKE) -C src/lib
 	$(MAKE) -C src/kernel
 
 clean:
-	$(MAKE) -> src/kernel clean
+	$(MAKE) -C src/lib clean
+	$(MAKE) -C src/kernel clean
 
 # =====================================================================================================================
 # = 
@@ -39,59 +41,17 @@ iso: all
 # = 
 # =====================================================================================================================
 
-GDB_REMOTE_PORT = 6666
+run: iso
+	$(BOCHS_EXE) -q -f bochrc.txt
 
-CPU_CONFIG = -machine q35,accel=tcg \
-  -cpu qemu64,+sse2,+sse4.2,+xsave,+xsaveopt,+fsgsbase,+rdtscp,+smep,+smap,+umip,+cx16,+popcnt,+aes,+pclmulqdq \
-  -smp 8 -m 1024M
-
-DBG_CONFIG = -monitor none \
-	-chardev socket,id=ser0,host=127.0.0.1,port=6667,server=on,wait=on \
-	-serial chardev:ser0 \
-	-chardev socket,id=dbg0,host=127.0.0.1,port=6668,server=on,wait=on \
-	-device isa-debugcon,iobase=0xe9,chardev=dbg0
-
-boot: iso
-	clear
-	$(QEMU_EXE) \
-		$(CPU_CONFIG) \
-		-cdrom $(ISO_FILE) \
-		-boot d \
-		-debugcon stdio
-		-no-reboot -no-shutdown 
-
-boot_test: iso
-	clear
-	$(QEMU_EXE) \
-		$(CPU_CONFIG) \
-		$(DBG_CONFIG) \
-		-cdrom $(ISO_FILE) \
-		-boot d \
-		-no-reboot -no-shutdown 
-
-# ---------------------------------------------------------------------------------------------------------------------
-
-boot_debug_test: iso
-	clear
-	$(QEMU_EXE) \
-		$(CPU_CONFIG) \
-		$(DBG_CONFIG) \
-		-cdrom $(ISO_FILE) \
-		-boot d \
-		-gdb tcp::$(GDB_REMOTE_PORT) -S \
-		-no-reboot -no-shutdown 
-
-gdb: iso
-	gdb -ex "target remote :$(GDB_REMOTE_PORT)" \
-		-ex "break _kernel_entrypoint" \
-		-ex "continue" \
-		$(KERNEL_FILE)
+debug: iso
+	$(BOCHS_EXE) -dbg_gui -q -f bochrc.txt #-rc bochrc-dbg.txt 
 
 # =====================================================================================================================
 # = 
 # =====================================================================================================================
 
-install-3rd-party-tools: install-llvm install-gdb install-nasm install-qemu install-limine
+install-3rd-party-tools: install-llvm install-nasm install-bochs install-limine
 
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -127,25 +87,6 @@ reinstall-llvm: remove-llvm install-llvm
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-GDB_PREFIX = $(GDB_DIR)
-
-GDB_CONFIG = --prefix=$(GDB_PREFIX)
-
-install-gdb:
-	mkdir -p $(KASMOS_3RD_PARTY_TOOLS_DIR)
-	( cd $(KASMOS_3RD_PARTY_TOOLS_DIR) && git clone https://sourceware.org/git/binutils-gdb.git )
-	( cd $(KASMOS_3RD_PARTY_TOOLS_DIR)/binutils-gdb && mkdir build && cd build && ../configure $(GDB_CONFIG) )
-	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/binutils-gdb/build
-	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/binutils-gdb/build install
-
-remove-gdb:
-	-rm -f -r $(KASMOS_3RD_PARTY_TOOLS_DIR)/binutils-gdb
-	-rm -f -r $(GDB_DIR)
-
-reinstall-gdb: remove-gdb install-gdb
-
-# ---------------------------------------------------------------------------------------------------------------------
-
 NASM_PREFIX = $(NASM_DIR)
 
 NASM_CONFIG = --prefix=$(NASM_PREFIX)
@@ -168,22 +109,67 @@ reinstall-nasm: remove-nasm install-nasm
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-QEMU_PREFIX = $(QEMU_DIR)
+BOCHS_PREFIX = $(BOCHS_DIR)
 
-QEMU_CONFIG = --prefix=$(QEMU_PREFIX) --target-list=x86_64-softmmu --enable-debug
+BOCHS_CONFIG = --prefix=$(BOCHS_PREFIX) \
+	--enable-plugins \
+	--enable-show-ips \
+	--enable-debugger \
+    --enable-x86-debugger \
+	--enable-debugger-gui \
+	--enable-all-optimizations \
+	--disable-docbook \
+	--with-sld2 \
+	--with-x11 \
+	--with-wx \
+	--enable-idle-hack \
+	--enable-iodebug \
+	--enable-a20-pin \
+	--enable-x86-64 \
+	--enable-smp\
+	--enable-cpu-level=6 \
+	--enable-long-phy-address \
+    --enable-fpu \
+    --enable-vmx=2 \
+    --enable-svm \
+    --enable-protection-keys \
+    --enable-cet \
+    --enable-uintr \
+    --enable-memtype \
+    --enable-avx \
+    --enable-evex \
+    --enable-amx \
+    --enable-pci \
+    --enable-usb \
+    --enable-usb-ohci \
+    --enable-usb-ehci \
+    --enable-usb-xhci \
+    --enable-usb-debugger \
+    --enable-ne2000 \
+    --enable-pnic \
+    --enable-e1000 \
+    --enable-clgd54xx \
+    --enable-geforce \
+    --enable-voodoo \
+    --enable-cdrom \
+    --enable-sb16 \
+    --enable-es1370 \
+    --enable-gameport \
+    --enable-busmouse \
+    --enable-xpm
 
-install-qemu:
+install-bochs:
 	mkdir -p $(KASMOS_3RD_PARTY_TOOLS_DIR)
-#	( cd $(KASMOS_3RD_PARTY_TOOLS_DIR) && git clone https://gitlab.com/qemu-project/qemu )
-	( cd $(KASMOS_3RD_PARTY_TOOLS_DIR)/qemu && mkdir build && cd build && ../configure $(QEMU_CONFIG) )
-	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/qemu/build
-	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/qemu/build install
+	( cd $(KASMOS_3RD_PARTY_TOOLS_DIR) && git clone https://github.com/bochs-emu/Bochs.git )
+	( cd $(KASMOS_3RD_PARTY_TOOLS_DIR)/Bochs/bochs && mkdir build-local && cd build-local && ../configure $(BOCHS_CONFIG) )
+	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/Bochs/bochs/build-local
+	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/Bochs/bochs/build-local install
 
-remove-qemu:
-	-rm -f -r $(KASMOS_3RD_PARTY_TOOLS_DIR)/qemu
-	-rm -f -r $(QEMU_DIR)
+remove-bochs:
+	-rm -f -r $(KASMOS_3RD_PARTY_TOOLS_DIR)/Bochs
+	-rm -f -r $(BOCHS_DIR)
 
-reinstall-qemu: remove-qemu install-qemu
+reinstall-bochs: remove-bochs install-bochs
 
 # ---------------------------------------------------------------------------------------------------------------------
 

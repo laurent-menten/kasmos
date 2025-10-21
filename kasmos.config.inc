@@ -2,14 +2,24 @@
 ; === KasmOS (c)2025+ Laurent Menten (laurent.menten@gmail.com) === GNU Lesser General Public License v3.0 (LGPLv3) ===
 ; =====================================================================================================================
 
+; NOTE: this file is automaticaly included (in first position !).
+; See NASM_FLAGS definition in Makefile.rules
+
+%ifndef __KASMOS_CONFIG_INC__
+%define __KASMOS_CONFIG_INC__
+
+; =====================================================================================================================
+; =
+; =====================================================================================================================
+
 %assign LIMINE_API_REVISION 3
 
 ; =====================================================================================================================
 ; = Sections map ======================================================================================================
 ; =====================================================================================================================
 
-    SECTION .limine_requests_start PROGBITS ALLOC
+	section .limine_requests_start PROGBITS ALLOC
+	section .limine_requests PROGBITS ALLOC
+	section .limine_requests_end PROGBITS ALLOC
 
-    SECTION .limine_requests PROGBITS ALLOC
-
-    SECTION .limine_requests_end PROGBITS ALLOC
+%endif ;__KASMOS_CONFIG_INC__

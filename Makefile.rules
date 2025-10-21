@@ -5,6 +5,7 @@
 KASMOS_BIN_DIR = $(KASMOS_DIR)/bin
 KASMOS_BUILD_DIR = $(KASMOS_DIR)/build
 KASMOS_INCLUDE_DIR = $(KASMOS_DIR)/include
+KASMOS_LIB_DIR = $(KASMOS_DIR)/lib
 KASMOS_SRC_DIR = $(KASMOS_DIR)/src
 
 KASMOS_TOOLS_DIR = $(KASMOS_DIR)/tools
@@ -19,7 +20,6 @@ KERNEL_DBG_FILE = $(KASMOS_BUILD_DIR)/kernel.dbg.elf
 KERNEL_LST_FILE = $(KASMOS_BUILD_DIR)/kernel.lst
 KERNEL_MAP_FILE = $(KASMOS_BUILD_DIR)/kernel.map
 KERNEL_SYMB_FILE = $(KASMOS_BUILD_DIR)/kernel.symb
-
 
 ISO_TMPDIR = $(KASMOS_BUILD_DIR)/iso
 ISO_FILE = $(KASMOS_DIR)/kasmos.iso
@@ -39,15 +39,6 @@ LLVM_OBJDUMP_EXE = $(LLVM_BIN_DIR)/llvm-objdump
 LLVM_STRIP_EXE = $(LLVM_BIN_DIR)/llvm-strip
 
 # =====================================================================================================================
-# 
-# =====================================================================================================================
-
-GDB_DIR = $(KASMOS_BIN_DIR)/gdb
-GDB_BIN_DIR = $(GDB_DIR)/bin
-
-GDB_EXE = $(GDB_BIN_DIR)/gdb
-
-# =====================================================================================================================
 # = nasm ==============================================================================================================
 # =====================================================================================================================
 
@@ -58,20 +49,21 @@ NASM_EXE = $(NASM_BIN_DIR)/nasm
 NDISASM_EXE = $(NASM_BIN_DIR)/ndisasm
 
 NASM_FLAGS = -f elf64 -g -F dwarf \
-    -w+error=all -Ox \
-    -i$(KASMOS_INCLUDE_DIR) -p $(KASMOS_DIR)/kasmos.config.inc -p kasmos.inc
+	-w+error=all -Ox \
+	-MD $(basename $@).d \
+	-i$(KASMOS_INCLUDE_DIR) -p $(KASMOS_DIR)/kasmos.config.inc -p kasmos.inc
 
 # =====================================================================================================================
-# 
+# = bochs =============================================================================================================
 # =====================================================================================================================
 
-QEMU_DIR = $(KASMOS_BIN_DIR)/qemu
-QEMU_BIN_DIR = $(QEMU_DIR)/bin
+BOCHS_DIR = $(KASMOS_BIN_DIR)/bochs
+BOCHS_BIN_DIR = $(BOCHS_DIR)/bin
 
-QEMU_EXE = $(QEMU_BIN_DIR)/qemu-system-x86_64
+BOCHS_EXE = $(BOCHS_BIN_DIR)/bochs
 
 # =====================================================================================================================
-# 
+# = limine ============================================================================================================
 # =====================================================================================================================
 
 LIMINE_DIR = $(KASMOS_BIN_DIR)/limine

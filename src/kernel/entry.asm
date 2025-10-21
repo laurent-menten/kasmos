@@ -2,51 +2,52 @@
 ; === KasmOS (c)2025+ Laurent Menten (laurent.menten@gmail.com) === GNU Lesser General Public License v3.0 (LGPLv3) ===
 ; =====================================================================================================================
 
-    cpu     X64
-    bits    64
+	cpu     X64
+	bits    64
 
-    %include "limine.inc"
+	%include "limine.inc"
 
 ; =====================================================================================================================
 ; =
 ; =====================================================================================================================
 
-    extern vdebug_write_string
+	extern vdebug_write_string
+	extern vdebug_write_word
 
-    extern kinit_run_all
-    extern kfini_run_all
+	extern kinit_run_all
+	extern kfini_run_all
 
 ; =====================================================================================================================
 ; = Limine ============================================================================================================
 ; =====================================================================================================================
 
-    section .limine_requests_start
+	section .limine_requests_start
 
-    LIMINE_REQUESTS_START_MARKER
+	LIMINE_REQUESTS_START_MARKER
 
-    section .limine_requests
+	section .limine_requests
 
-    LIMINE_BASE_REVISION 3
+	LIMINE_BASE_REVISION 3
 
 
 _limine_mp_request:
-    istruc limine_mp_request
-        LIMINE_REQUEST_HEADER                   LIMINE_MP_REQUEST_2, LIMINE_MP_REQUEST_3
+	istruc limine_mp_request
+		LIMINE_REQUEST_HEADER                   LIMINE_MP_REQUEST_2, LIMINE_MP_REQUEST_3
 .response:
-        at limine_mp_request.response,          dq 0
-        at limine_mp_request.flags,             dq 0
-    iend
+		at limine_mp_request.response,          dq 0
+		at limine_mp_request.flags,             dq 0
+	iend
 
 _limine_framebuffer_request:
-    istruc limine_framebuffer_request
-        LIMINE_REQUEST_HEADER                   LIMINE_FRAMEBUFFER_REQUEST_2, LIMINE_FRAMEBUFFER_REQUEST_3
+	istruc limine_framebuffer_request
+		LIMINE_REQUEST_HEADER                   LIMINE_FRAMEBUFFER_REQUEST_2, LIMINE_FRAMEBUFFER_REQUEST_3
 .response:
-        at limine_framebuffer_request.response, dq 0
-    iend
+		at limine_framebuffer_request.response, dq 0
+	iend
 
-    section .limine_requests_start
+	section .limine_requests_start
 
-    LIMINE_REQUESTS_END_MARKER
+	LIMINE_REQUESTS_END_MARKER
 
 ; =====================================================================================================================
 ; = Entrypoint ========================================================================================================
@@ -78,29 +79,45 @@ _limine_framebuffer_request:
 ; Boot services (EFI/UEFI) exited.
 ;
 
-    section .text    
+	section .text    
 
-    global _kernel_entrypoint
+	global _kernel_entrypoint
 _kernel_entrypoint:
-    mov rsi, hello
-    call vdebug_write_string
+	BOCHS_MAGIC_BREAK
 
-    call    kinit_run_all
+	call    .z
 
-    nop
+.z  mov     rsi, hello
+	call    vdebug_write_string
 
-    call    kfini_run_all
+	pop     rax
+	mov     cl, 16
+	call    vdebug_write_word
+	mov     rsi, cr_lf
+	call    vdebug_write_string
+
+	call    kinit_run_all
+
+	nop
+
+	call    kfini_run_all
 
 .hang:
-    hlt
-    jmp .hang
+	BOCHS_MAGIC_BREAK
 
-    section .data
+.hang_loop:
+	hlt
+	jmp .hang_loop
+
+	section .data
 
 ; =====================================================================================================================
 ; = 
 ; =====================================================================================================================
 
-hello:
-    db 'kasmos booting...', 10, 0
+RODATA hello
+	db  'kasmos booting...'
+
+RODATA cr_lf
+	db  10, 13, 0
 
