@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "QEMU (gdbstub) - GDB",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/build/kernel.elf",
+        "cwd": "${workspaceFolder}",
+        "MIMode": "gdb",
+        "miDebuggerPath": "gdb",
+        "miDebuggerServerAddress": "localhost:1234",
+        "stopAtConnect": true,
+        "externalConsole": false,
+        "setupCommands": [
+          { "text": "-enable-pretty-printing" },
+          { "text": "set disassembly-flavor intel" },
+          { "text": "set pagination off" }
+        ]
+      }
+    ]
+  }

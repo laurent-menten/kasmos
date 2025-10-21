@@ -1,0 +1,29 @@
+{
+    "version": 4,
+    "configurations": [
+      {
+        "name": "Kasmos kernel",
+        "compilerPath": "/lmenten/src/kasmos/bin/llvm/bin/clang",
+        "intelliSenseMode": "gcc-x64",
+        "includePath": [
+          "${workspaceFolder}/src",
+          "${workspaceFolder}/include/freestnd-c-hdrs",
+          "${workspaceFolder}/include"
+        ],
+        "defines": [
+          "LIMINE_API_REVISION=3",
+          "PRINTF_INCLUDE_CONFIG_H",
+          "_GNU_SOURCE"
+        ],
+        "cStandard": "c17",
+        "cppStandard": "c++23",
+        "browse": {
+          "path": [
+            "${workspaceFolder}",
+          ],
+          "limitSymbolsToIncludedHeaders": true
+        }
+      }
+    ]
+  }
+  

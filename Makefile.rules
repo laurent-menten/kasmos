@@ -1,0 +1,116 @@
+# =====================================================================================================================
+# === KasmOS (c)2025+ Laurent Menten (laurent.menten@gmail.com) === GNU Lesser General Public License v3.0 (LGPLv3) ===
+# =====================================================================================================================
+
+KASMOS_BIN_DIR = $(KASMOS_DIR)/bin
+KASMOS_BUILD_DIR = $(KASMOS_DIR)/build
+KASMOS_INCLUDE_DIR = $(KASMOS_DIR)/include
+KASMOS_SRC_DIR = $(KASMOS_DIR)/src
+
+KASMOS_TOOLS_DIR = $(KASMOS_DIR)/tools
+KASMOS_3RD_PARTY_TOOLS_DIR = $(KASMOS_TOOLS_DIR)/3rd-party
+
+# =====================================================================================================================
+# = kernel files ======================================================================================================
+# =====================================================================================================================
+
+KERNEL_FILE = $(KASMOS_BUILD_DIR)/kernel.elf
+KERNEL_DBG_FILE = $(KASMOS_BUILD_DIR)/kernel.dbg.elf
+KERNEL_LST_FILE = $(KASMOS_BUILD_DIR)/kernel.lst
+KERNEL_MAP_FILE = $(KASMOS_BUILD_DIR)/kernel.map
+KERNEL_SYMB_FILE = $(KASMOS_BUILD_DIR)/kernel.symb
+
+
+ISO_TMPDIR = $(KASMOS_BUILD_DIR)/iso
+ISO_FILE = $(KASMOS_DIR)/kasmos.iso
+
+# =====================================================================================================================
+# = llvm ==============================================================================================================
+# =====================================================================================================================
+
+LLVM_DIR = $(KASMOS_BIN_DIR)/llvm
+LLVM_BIN_DIR = $(LLVM_DIR)/bin
+
+LLVM_AR_EXE = $(LLVM_BIN_DIR)/llvm-ar
+LLVM_LD_EXE = $(LLVM_BIN_DIR)/ld.lld
+LLVM_NM_EXE = $(LLVM_BIN_DIR)/llvm-nm
+LLVM_OBJCOPY_EXE = $(LLVM_BIN_DIR)/llvm-objcopy
+LLVM_OBJDUMP_EXE = $(LLVM_BIN_DIR)/llvm-objdump
+LLVM_STRIP_EXE = $(LLVM_BIN_DIR)/llvm-strip
+
+# =====================================================================================================================
+# 
+# =====================================================================================================================
+
+GDB_DIR = $(KASMOS_BIN_DIR)/gdb
+GDB_BIN_DIR = $(GDB_DIR)/bin
+
+GDB_EXE = $(GDB_BIN_DIR)/gdb
+
+# =====================================================================================================================
+# = nasm ==============================================================================================================
+# =====================================================================================================================
+
+NASM_DIR = $(KASMOS_BIN_DIR)/nasm
+NASM_BIN_DIR = $(NASM_DIR)/bin
+
+NASM_EXE = $(NASM_BIN_DIR)/nasm
+NDISASM_EXE = $(NASM_BIN_DIR)/ndisasm
+
+NASM_FLAGS = -f elf64 -g -F dwarf \
+    -w+error=all -Ox \
+    -i$(KASMOS_INCLUDE_DIR) -p $(KASMOS_DIR)/kasmos.config.inc -p kasmos.inc
+
+# =====================================================================================================================
+# 
+# =====================================================================================================================
+
+QEMU_DIR = $(KASMOS_BIN_DIR)/qemu
+QEMU_BIN_DIR = $(QEMU_DIR)/bin
+
+QEMU_EXE = $(QEMU_BIN_DIR)/qemu-system-x86_64
+
+# =====================================================================================================================
+# 
+# =====================================================================================================================
+
+LIMINE_DIR = $(KASMOS_BIN_DIR)/limine
+LIMINE_BIN_DIR = $(LIMINE_DIR)/bin
+
+LIMINE_IMAGES = $(LIMINE_DIR)/share/limine
+
+# =====================================================================================================================
+# 
+# =====================================================================================================================
+
+OBJ_DIR = $(KASMOS_BUILD_DIR)/$(patsubst $(KASMOS_SRC_DIR)/%,%,$(CURDIR))
+
+SRC_ASM := $(wildcard $(CURDIR)/**/*.asm) $(wildcard $(CURDIR)/*.asm)
+SRC_C := $(wildcard $(CURDIR)/**/*.c) $(wildcard $(CURDIR)/*.c)
+SRC_CXX := $(wildcard $(CURDIR)/**/*.cxx) $(wildcard $(CURDIR)/*.cxx)
+
+OBJ_ASM := $(patsubst $(CURDIR)/%.asm, $(OBJ_DIR)/%.o, $(SRC_ASM))
+OBJ_C := $(patsubst $(CURDIR)/%.c, $(OBJ_DIR)/%.o, $(SRC_C))
+OBJ_CXX := $(patsubst $(CURDIR)/%.cxx, $(OBJ_DIR)/%.o, $(SRC_CXX))
+
+OBJS := $(OBJ_ASM) $(OBJ_C) $(OBJ_CXX)
+DEPS := $(OBJS:.o=.d)
+
+# =====================================================================================================================
+# 
+# =====================================================================================================================
+
+# .asm -> .o
+$(OBJ_DIR)/%.o: $(CURDIR)/%.asm
+	mkdir -p $(dir $@)
+	$(NASM_EXE) $(NASM_FLAGS) -l $(basename $@).lst -o $@ $<
+
+# .c -> .o
+$(OBJ_DIR)/%.o: $(CURDIR)/%.c
+	@mkdir -p $(dir $@)
+	$(CC)  $(CPPFLAGS) $(CFLAGS) -MMD -MP -c $< -o $@
+
+# .cxx -> .o
+$(OBJ_DIR)/%.o: $(CURDIR)/%.cxx
+	@mkdir -p $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -MP -c $< -o $@
