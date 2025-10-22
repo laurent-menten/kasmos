@@ -6,28 +6,17 @@
 	bits    64
 
 ; =====================================================================================================================
-; = strlen ============================================================================================================
+; = 
 ; =====================================================================================================================
-;
-; Returns the length of an asciiz sting.
-;
-;	In:		rsi			the address of the asciiz string.
-;
-;	Out:	rcx			the length of the string.
-;
 
-FUNCTION strlen
-	push	rsi
+;   rbx < list
+;   rax > is empty
 
-	xor		rcx, rcx
+FUNCTION __list_is_empty_unlocked
+    mov     rax, [rbx + linked_list.head]
+    and     rax, rax
+    setz    rax
+    ret
 
-.loop:
-	cmp		byte [rsi], 0
-	jz		.return
-
-	inc		rcx
-	jmp		.loop
-
-.return:
-	pop		rsi
-	ret
+FUNCTION __list_is_empty_locked
+    jmp     __list_is_empty_unlocked

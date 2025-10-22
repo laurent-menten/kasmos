@@ -5,29 +5,35 @@
 	cpu     x64
 	bits    64
 
-; =====================================================================================================================
-; = strlen ============================================================================================================
-; =====================================================================================================================
-;
-; Returns the length of an asciiz sting.
-;
-;	In:		rsi			the address of the asciiz string.
-;
-;	Out:	rcx			the length of the string.
-;
+	extern vdebug_write_string
+	extern vdebug_write_word
 
-FUNCTION strlen
-	push	rsi
+; =====================================================================================================================
+; = 
+; =====================================================================================================================
 
-	xor		rcx, rcx
+FUNCTION _kernel_panic
+
+	BOCHS_MAGIC_BREAK
+
+	mov     rsi, txt_kernel_panic_1
+	call    vdebug_write_string
+
+	extern _kasmos_master_list
+
+	mov		rax, qword [abs _kasmos_master_list + kasmos_master_list.panic_code]
+	mov		rcx, 16
+	call	vdebug_write_word
+
+	mov     rsi, txt_kernel_panic_2
+	call    vdebug_write_string
 
 .loop:
-	cmp		byte [rsi], 0
-	jz		.return
+	hlt
+	jmp .loop
 
-	inc		rcx
-	jmp		.loop
+RODATA txt_kernel_panic_1
+	db	'Kernel Panic : code = ', 0
 
-.return:
-	pop		rsi
-	ret
+RODATA txt_kernel_panic_2
+	db	' !!!', 10, 13, 0

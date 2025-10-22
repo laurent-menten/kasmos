@@ -2,8 +2,8 @@
 ; === KasmOS (c)2025+ Laurent Menten (laurent.menten@gmail.com) === GNU Lesser General Public License v3.0 (LGPLv3) ===
 ; =====================================================================================================================
 
-    cpu     x64
-    bits    64
+	cpu     x64
+	bits    64
 
 ; =====================================================================================================================
 ; = vdebug_write_char =================================================================================================
@@ -15,8 +15,8 @@
 ;
 
 FUNCTION vdebug_write_char
-    out BOCHS_HACK_PORT, al
-    ret
+	out BOCHS_HACK_PORT, al
+	ret
 
 ; =====================================================================================================================
 ; = vdebug_write_string ===============================================================================================
@@ -28,25 +28,25 @@ FUNCTION vdebug_write_char
 ;
 
 FUNCTION vdebug_write_string
-    pushf
-    push    rax
-    push    rsi
+	pushf
+	push    rax
+	push    rsi
 
-    cld
+	cld
 
  .loop:
-    lodsb
-    test    al, al
-    jz      .return
+	lodsb
+	test    al, al
+	jz      .return
 
-    call    vdebug_write_char
-    jmp     .loop
+	call    vdebug_write_char
+	jmp     .loop
 
 .return:
-    pop     rsi
-    pop     rax
-    popf
-    ret
+	pop     rsi
+	pop     rax
+	popf
+	ret
 
 ; =====================================================================================================================
 ; = vdebug_write_xdigit ===============================================================================================
@@ -58,21 +58,21 @@ FUNCTION vdebug_write_string
 ;
 
 FUNCTION vdebug_write_xdigit
-    push    rax
-    push    rbx
+	push    rax
+	push    rbx
 
-    mov     rbx, vdebug_hex_table
+	mov     rbx, vdebug_hex_table
 
-    and     al, 0x0F
-    xlat
-    call    vdebug_write_char
+	and     al, 0x0F
+	xlat
+	call    vdebug_write_char
 
-    pop     rbx
-    pop     rax
-    ret
+	pop     rbx
+	pop     rax
+	ret
 
 RODATA vdebug_hex_table
-    db      "0123456789ABCDEF"
+	db      "0123456789ABCDEF"
 
 ; =====================================================================================================================
 ; = 
@@ -84,84 +84,97 @@ RODATA vdebug_hex_table
 ;   Out:    /
 ;
 
-
 FUNCTION vdebug_write_word
-    push    rcx
+	push    rcx
 
-    mov     ch, cl
-    dec     cl
-    shl     cl, 4
-    ror     rax, cl
+	and		rcx, rcx
+	jz		.return
 
-    mov     cl, ch
+	cmp     rcx, 16
+	jbe     .rcx_ok
+
+	mov     rcx, 16
+
+.rcx_ok:
+	mov     ch, cl
+	mov     cl, 16						;
+	sub     cl, ch						; 
+	jz      .full_print
+
+	shl     cl, 2
+	rol     rax, cl
+
+.full_print:
+	mov     cl, ch
 
 .loop:
-    call    vdebug_write_xdigit
+	rol     rax, 4
 
-    rol     rax, 4
+	call    vdebug_write_xdigit
 
-    dec     cl
-    jnz     .loop
+	dec     cl
+	jnz     .loop
 
-    pop     rcx
-    ret
+.return:
+	pop     rcx
+	ret
 
 FUNCTION vdebug_write_xword
-    push    rax
-    push    rbx
+	push    rax
+	push    rbx
 
-    push    rax
-    shr     al, 8
-    call    vdebug_write_xdigit
+	push    rax
+	shr     al, 8
+	call    vdebug_write_xdigit
 
-    pop     rax
-    call    vdebug_write_xdigit
+	pop     rax
+	call    vdebug_write_xdigit
 
-    pop     rbx
-    pop     rax
-    ret
+	pop     rbx
+	pop     rax
+	ret
 
 FUNCTION vdebug_write_xdword
-    push    rax
-    push    rbx
+	push    rax
+	push    rbx
 
-    push    rax
-    shr     al, 16
-    call    vdebug_write_xword
+	push    rax
+	shr     al, 16
+	call    vdebug_write_xword
 
-    pop     rax
-    call    vdebug_write_xword
+	pop     rax
+	call    vdebug_write_xword
 
-    pop     rbx
-    pop     rax
-    ret
+	pop     rbx
+	pop     rax
+	ret
 
 FUNCTION vdebug_write_xqword
-    push    rax
-    push    rbx
+	push    rax
+	push    rbx
 
-    push    rax
-    shr     al, 32
-    call    vdebug_write_xdword
+	push    rax
+	shr     al, 32
+	call    vdebug_write_xdword
 
-    pop     rax
-    call    vdebug_write_xdword
+	pop     rax
+	call    vdebug_write_xdword
 
-    pop     rbx
-    pop     rax
-    ret
+	pop     rbx
+	pop     rax
+	ret
 
 FUNCTION vdebug_write_xtword
-    push    rax
-    push    rbx
+	push    rax
+	push    rbx
 
-    push    rax
-    mov     rax, rdx
-    call    vdebug_write_xqword
+	push    rax
+	mov     rax, rdx
+	call    vdebug_write_xqword
 
-    pop     rax
-    call    vdebug_write_xqword
+	pop     rax
+	call    vdebug_write_xqword
 
-    pop     rbx
-    pop     rax
-    ret
+	pop     rbx
+	pop     rax
+	ret

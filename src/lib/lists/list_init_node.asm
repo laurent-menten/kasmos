@@ -6,28 +6,13 @@
 	bits    64
 
 ; =====================================================================================================================
-; = strlen ============================================================================================================
+; = 
 ; =====================================================================================================================
-;
-; Returns the length of an asciiz sting.
-;
-;	In:		rsi			the address of the asciiz string.
-;
-;	Out:	rcx			the length of the string.
-;
 
-FUNCTION strlen
-	push	rsi
+;   rsi < node
 
-	xor		rcx, rcx
+FUNCTION _list_init_node
+    mov     qword [rsi + linked_list_node.next], 0
+    mov     qword [rsi + linked_list_node.prev], 0
+    ret
 
-.loop:
-	cmp		byte [rsi], 0
-	jz		.return
-
-	inc		rcx
-	jmp		.loop
-
-.return:
-	pop		rsi
-	ret

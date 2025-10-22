@@ -13,6 +13,8 @@ all:
 clean:
 	$(MAKE) -C src/lib clean
 	$(MAKE) -C src/kernel clean
+	-rm -r $(KASMOS_BUILD_DIR)
+	-rm $(ISO_FILE)
 
 # =====================================================================================================================
 # = 
@@ -42,16 +44,20 @@ iso: all
 # =====================================================================================================================
 
 run: iso
-	$(BOCHS_EXE) -q -f bochrc.txt
+	$(BOCHS_EXE) -q -f kasmos.bochsrc
 
 debug: iso
-	$(BOCHS_EXE) -dbg_gui -q -f bochrc.txt #-rc bochrc-dbg.txt 
+	$(BOCHS_EXE) -dbg_gui -q -f kasmos.bochsrc
 
 # =====================================================================================================================
 # = 
 # =====================================================================================================================
 
 install-3rd-party-tools: install-llvm install-nasm install-bochs install-limine
+
+clean-3rd-party-tools: clean-llvm clean-nasm clean-bochs clean-limine
+
+remove-3rd-party-tools: remove-llvm remove-nasm remove-bochs remove-limine
 
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -79,6 +85,9 @@ install-llvm:
 	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/llvm-project/build
 	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/llvm-project/build install
 
+clean-llvm:
+	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/llvm-project/build clean
+
 remove-llvm:
 	-rm -f -r $(KASMOS_3RD_PARTY_TOOLS_DIR)/llvm-project
 	-rm -f -r $(LLVM_DIR)
@@ -100,6 +109,9 @@ install-nasm:
 	( cd $(KASMOS_3RD_PARTY_TOOLS_DIR)/nasm/build && make manpages && cp *.1 ..)
 	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/nasm/build
 	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/nasm/build install
+
+clean-nasm:
+	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/nasm/build clean
 
 remove-nasm:
 	-rm -f -r $(KASMOS_3RD_PARTY_TOOLS_DIR)/nasm
@@ -165,6 +177,9 @@ install-bochs:
 	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/Bochs/bochs/build-local
 	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/Bochs/bochs/build-local install
 
+clean-bochs:
+	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/Bochs/bochs/build-local clean
+
 remove-bochs:
 	-rm -f -r $(KASMOS_3RD_PARTY_TOOLS_DIR)/Bochs
 	-rm -f -r $(BOCHS_DIR)
@@ -192,6 +207,9 @@ install-limine:
 	( cd $(KASMOS_3RD_PARTY_TOOLS_DIR)/limine && mkdir build && cd build && TOOLCHAIN_FOR_TARGET= ../configure $(LIMINE_CONFIG) )
 	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/limine/build
 	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/limine/build install
+
+clean-limine:
+	make -C $(KASMOS_3RD_PARTY_TOOLS_DIR)/limine/build clean
 
 remove-limine:
 	-rm -f -r $(KASMOS_3RD_PARTY_TOOLS_DIR)/limine

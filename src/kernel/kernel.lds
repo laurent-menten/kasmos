@@ -49,7 +49,9 @@ SECTIONS
     .text :
     {
         PROVIDE_HIDDEN( __text_start = . );
-        *(.text .text.*)
+        KEEP( kernel.o( .text .text.* ) )
+        KEEP( entry.o( .text .text.* ) )
+        *( .text .text.* )
         PROVIDE_HIDDEN( __text_end = . );
     } :text
 
@@ -62,7 +64,9 @@ SECTIONS
     .rodata :
     {
         PROVIDE_HIDDEN( __rodata_start = . );
-        *(.rodata .rodata.*)
+        KEEP( kernel.o( .rodata .rodata.* ) )
+        KEEP( entry.o( .rodata .rodata.* ) )
+        *( .rodata .rodata.* )
         PROVIDE_HIDDEN( __rodata_end = . );
     } :rodata
 
@@ -99,6 +103,8 @@ SECTIONS
     .data ALIGN( 16 ) :
     {
         PROVIDE_HIDDEN( __data_start = . );
+        KEEP( kernel.o( .data .data.* ) )
+        KEEP( entry.o( .data .data.* ) )
         *(.data .data.*)
         PROVIDE_HIDDEN( __data_end = . );
     } :data

@@ -5,6 +5,8 @@
 	cpu     X64
 	bits    64
 
+	%include "kernel_panic.inc"
+
 	%include "limine.inc"
 
 ; =====================================================================================================================
@@ -13,41 +15,6 @@
 
 	extern vdebug_write_string
 	extern vdebug_write_word
-
-	extern kinit_run_all
-	extern kfini_run_all
-
-; =====================================================================================================================
-; = Limine ============================================================================================================
-; =====================================================================================================================
-
-	section .limine_requests_start
-
-	LIMINE_REQUESTS_START_MARKER
-
-	section .limine_requests
-
-	LIMINE_BASE_REVISION 3
-
-
-_limine_mp_request:
-	istruc limine_mp_request
-		LIMINE_REQUEST_HEADER                   LIMINE_MP_REQUEST_2, LIMINE_MP_REQUEST_3
-.response:
-		at limine_mp_request.response,          dq 0
-		at limine_mp_request.flags,             dq 0
-	iend
-
-_limine_framebuffer_request:
-	istruc limine_framebuffer_request
-		LIMINE_REQUEST_HEADER                   LIMINE_FRAMEBUFFER_REQUEST_2, LIMINE_FRAMEBUFFER_REQUEST_3
-.response:
-		at limine_framebuffer_request.response, dq 0
-	iend
-
-	section .limine_requests_start
-
-	LIMINE_REQUESTS_END_MARKER
 
 ; =====================================================================================================================
 ; = Entrypoint ========================================================================================================
@@ -78,27 +45,118 @@ _limine_framebuffer_request:
 ; Legacy PIC and IO APIC IRQs (only those with delivery mode fixed (0b000) or lowest priority (0b001)) all masked.
 ; Boot services (EFI/UEFI) exited.
 ;
-
 	section .text    
 
 	global _kernel_entrypoint
 _kernel_entrypoint:
 	BOCHS_MAGIC_BREAK
 
-	call    .z
+	extern _list_test
+	call _list_test
 
-.z  mov     rsi, hello
+	; -----------------------------------------------------------------------------------------------------------------
+
+	mov     rsi, txt_hello
 	call    vdebug_write_string
 
-	pop     rax
+	; -----------------------------------------------------------------------------------------------------------------
+	; r15 will always hold the kasmos_master_list address when in kernel code.
+	; -----------------------------------------------------------------------------------------------------------------
+
+	mov		r15, _kasmos_master_list
+
+	; -----------------------------------------------------------------------------------------------------------------
+	; Setup the kernel allocator data
+	; -----------------------------------------------------------------------------------------------------------------
+
+	extern	__kernel_data_buffer_start
+	extern	__kernel_data_buffer_end
+
+	lea		rdi, [r15 + kasmos_master_list.kmem]
+
+	mov 	rax, __kernel_data_buffer_start
+
+	mov		[rdi + kasmos_kmem.kmem_base], rax
+	mov		[rdi + kasmos_kmem.kmem_freebase], rax
+
+	mov		rbx, __kernel_data_buffer_end
+	sub		rbx, rax
+
+	mov		[rdi + kasmos_kmem.kmem_size], rbx
+	mov		[rdi + kasmos_kmem.kmem_avail], rbx
+
+	; -----------------------------------------------------------------------------------------------------------------
+	; 
+	; -----------------------------------------------------------------------------------------------------------------
+
+	extern	_limine_mp_request
+
+	mov		rsi, _limine_mp_request
+	mov		rsi, [rsi + limine_mp_request.response]
+	and		rsi, rsi
+	jnz		.mp_response_available
+
+	KERNEL_PANIC PANIC_CODE_NO_MP_INFOS
+
+.mp_response_available:
+
+	mov		rcx, [rsi + limine_mp_response.cpu_count]
+
+	mov		rax, kasmos_cpu_data_block_size
+	mul		rax, rcx
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	PUSH_ARGS	rax, rbx
+	call    .z
+	POP_ARGS
+
+
+.z  pop     rax
 	mov     cl, 16
 	call    vdebug_write_word
 	mov     rsi, cr_lf
 	call    vdebug_write_string
 
+	mov     cl, 12
+	call    vdebug_write_word
+	mov     rsi, cr_lf
+	call    vdebug_write_string
+
+	; -----------------------------------------------------------------------------------------------------------------
+	; 
+	; -----------------------------------------------------------------------------------------------------------------
+
+	extern kinit_run_all
+
 	call    kinit_run_all
 
-	nop
+	; -----------------------------------------------------------------------------------------------------------------
+	; 
+	; -----------------------------------------------------------------------------------------------------------------
+
+	; ....
+
+	; -----------------------------------------------------------------------------------------------------------------
+	; 
+	; -----------------------------------------------------------------------------------------------------------------
+
+	extern kfini_run_all
 
 	call    kfini_run_all
 
@@ -115,7 +173,7 @@ _kernel_entrypoint:
 ; = 
 ; =====================================================================================================================
 
-RODATA hello
+RODATA txt_hello
 	db  'kasmos booting...'
 
 RODATA cr_lf
