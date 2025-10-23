@@ -9,8 +9,8 @@
 	extern _kernel_panic
 
 %macro KERNEL_PANIC 1
-	mov     dword [abs _kasmos_master_list + kasmos_master_list.panic_code ], (%1) & 0xFFFF_FFFF
-	mov     dword [abs _kasmos_master_list + kasmos_master_list.panic_code + 4 ], (%1) >> 32
+	mov     dword [fs: thread_control_block.panic_code + 0], (%1) & 0xFFFF_FFFF
+	mov     dword [fs: thread_control_block.panic_code + 4], (%1) >> 32
 	jmp     _kernel_panic
 %endmacro
 

@@ -1,13 +1,13 @@
 log: bochs.log
 
-magic_break: enabled=1
 
-cpu: model=tigerlake, count=2, reset_on_triple_fault=1
+cpu: model=tigerlake, count=2, reset_on_triple_fault=0
 megs: 1024
 
 debug_symbols: file=/home/lmenten/src/kasmos/build/kernel.symb
 iodebug: all_rings=1
 port_e9_hack: enabled=1, all_rings=1
+magic_break: enabled=1
 
 romimage: file=/home/lmenten/src/kasmos/bin/bochs/share/bochs/BIOS-bochs-latest
 vgaromimage: file=/home/lmenten/src/kasmos/bin/bochs/share/bochs/VGABIOS-lgpl-latest.bin

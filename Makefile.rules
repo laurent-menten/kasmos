@@ -20,6 +20,7 @@ KERNEL_DBG_FILE = $(KASMOS_BUILD_DIR)/kernel.dbg.elf
 KERNEL_LST_FILE = $(KASMOS_BUILD_DIR)/kernel.lst
 KERNEL_MAP_FILE = $(KASMOS_BUILD_DIR)/kernel.map
 KERNEL_SYMB_FILE = $(KASMOS_BUILD_DIR)/kernel.symb
+KERNEL_ASYMB_FILE = $(KASMOS_BUILD_DIR)/kernel.symb-a
 
 ISO_TMPDIR = $(KASMOS_BUILD_DIR)/iso
 ISO_FILE = $(KASMOS_DIR)/kasmos.iso
@@ -51,7 +52,7 @@ NDISASM_EXE = $(NASM_BIN_DIR)/ndisasm
 NASM_FLAGS = -f elf64 -g -F dwarf \
 	-w+error=all -Ox \
 	-MD $(basename $@).d \
-	-i$(KASMOS_INCLUDE_DIR) -p $(KASMOS_DIR)/kasmos.config.inc -p kasmos.inc
+	-i$(KASMOS_INCLUDE_DIR) -p $(KASMOS_DIR)/kasmos.config.inc -p asm.inc -p kasmos.inc
 
 # =====================================================================================================================
 # = bochs =============================================================================================================

@@ -1,3 +1,14 @@
+# Registers usage
+
+## Kernel
+
+- **gs:** thread_control_block (kernel)
+- **fs:** cpu_control_block
+
+## User
+
+- **gs:** thread_control_block (user)
+- **fs:** /
 
 # Calling convention
 

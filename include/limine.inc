@@ -93,7 +93,6 @@ endstruc
 
 ; ===== Bootloader info ================================================================
 
-; #define LIMINE_BOOTLOADER_INFO_REQUEST { MAGIC..., 0xf55038d8e2a1202f, 0x279426fcf5f59740 }
 %define LIMINE_BOOTLOADER_INFO_REQUEST_2 0xf55038d8e2a1202f
 %define LIMINE_BOOTLOADER_INFO_REQUEST_3 0x279426fcf5f59740
 

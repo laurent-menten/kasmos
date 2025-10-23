@@ -5,6 +5,8 @@
 	cpu     x64
 	bits    64
 
+	%include "thread_control_block.inc"
+
 	extern vdebug_write_string
 	extern vdebug_write_word
 
@@ -21,7 +23,7 @@ FUNCTION _kernel_panic
 
 	extern _kasmos_master_list
 
-	mov		rax, qword [abs _kasmos_master_list + kasmos_master_list.panic_code]
+	mov		rax, qword [fs: thread_control_block.panic_code]
 	mov		rcx, 16
 	call	vdebug_write_word
 

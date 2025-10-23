@@ -6,6 +6,16 @@ export KASMOS_DIR = $(abspath .)
 
 include $(KASMOS_DIR)/Makefile.rules
 
+# =====================================================================================================================
+# = 
+# =====================================================================================================================
+
+.PHONY:	all clean iso
+
+# =====================================================================================================================
+# = 
+# =====================================================================================================================
+
 all:
 	$(MAKE) -C src/lib
 	$(MAKE) -C src/kernel
@@ -16,14 +26,17 @@ clean:
 	-rm -r $(KASMOS_BUILD_DIR)
 	-rm $(ISO_FILE)
 
+iso: $(ISO_FILE)
+
 # =====================================================================================================================
 # = 
 # =====================================================================================================================
 
-iso: all
+$(ISO_FILE): all
 	mkdir -p $(ISO_TMPDIR)/boot
 	cp $(KERNEL_FILE) $(ISO_TMPDIR)/boot/
 	cp $(KERNEL_DBG_FILE) $(ISO_TMPDIR)/boot/
+	cp $(KASMOS_DIR)/assets/kasmos.png $(ISO_TMPDIR)/boot/
 	mkdir -p $(ISO_TMPDIR)/boot/limine
 	cp $(LIMINE_IMAGES)/limine-bios.sys $(ISO_TMPDIR)/boot/limine/
 	cp $(LIMINE_IMAGES)/limine-bios-cd.bin $(ISO_TMPDIR)/boot/limine/
@@ -52,6 +65,10 @@ debug: iso
 # =====================================================================================================================
 # = 
 # =====================================================================================================================
+
+bootstrap:
+	@echo TODO: make a nice system to DL the 3rd-party tools
+	@echo TODO: install dependencies as well
 
 install-3rd-party-tools: install-llvm install-nasm install-bochs install-limine
 

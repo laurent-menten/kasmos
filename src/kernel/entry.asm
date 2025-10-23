@@ -5,6 +5,9 @@
 	cpu     X64
 	bits    64
 
+	%include "x86_64.inc"
+	%include "cpu_control_block.inc"
+	%include "thread_control_block.inc"
 	%include "kernel_panic.inc"
 
 	%include "limine.inc"
@@ -45,15 +48,101 @@
 ; Legacy PIC and IO APIC IRQs (only those with delivery mode fixed (0b000) or lowest priority (0b001)) all masked.
 ; Boot services (EFI/UEFI) exited.
 ;
+
+;	extern _list_test
+;	call _list_test
+
 	section .text    
 
 	global _kernel_entrypoint
 _kernel_entrypoint:
 	BOCHS_MAGIC_BREAK
 
-	extern _list_test
-	call _list_test
+	extern _limine_executable_command_line_request.response
+	extern _kernel_parameters
+	extern _parse_command_line
 
+	mov		rsi, txt_cmdline
+	call	vdebug_write_string
+
+	mov		rsi, _limine_executable_command_line_request.response
+	mov		rsi, [rsi]
+	test	rsi, rsi
+	jz		.skip_command_line
+
+	mov		r8, [rsi + limine_executable_cmdline_response.cmdline]
+	test	r8, r8
+	jz		.skip_command_line
+
+	call	vdebug_write_string
+
+	mov		rsi, txt_crlf
+	call	vdebug_write_string
+
+	mov		rsi, r8
+	mov		rdi, _kernel_parameters
+	call	_parse_command_line
+
+	mov		rdi, _kernel_parameters
+.params_loop:
+	mov		rsi, [rdi + kvpair.key]
+	test	rsi, rsi
+	jz		.skip_command_line
+
+	call	vdebug_write_string
+
+	mov		rsi, txt_equal
+	call	vdebug_write_string
+
+	mov		rsi, [rdi + kvpair.value]
+	test	rsi, rsi
+	jz		.no_param_value
+
+	call	vdebug_write_string
+
+.no_param_value:
+	mov		rsi, txt_crlf
+	call	vdebug_write_string
+
+	add		rdi, kvpair.size
+	jmp		.params_loop
+
+.skip_command_line:
+
+	; -----------------------------------------------------------------------------------------------------------------
+	; Setup GS: base addresses for the BSP (BootStrap Processor) control block
+	; -----------------------------------------------------------------------------------------------------------------
+
+	extern _bsp_cpu_control_block
+
+	mov		rsi, _bsp_cpu_control_block
+	mov		eax, esi
+	shr		rsi, 32
+	mov		edx, esi
+
+	mov		ecx, IA32_GS_BASE
+	wrmsr
+
+	mov		ecx, IA32_KERNEL_GS_BASE
+	wrmsr
+
+	mov		eax, [gs: cpu_control_block.user]
+
+	; -----------------------------------------------------------------------------------------------------------------
+	; Setup FS: base address for the idle thread control block of the BSP
+	; -----------------------------------------------------------------------------------------------------------------
+
+	extern _bsp_idle_thread_control_block
+
+	mov		rsi, _bsp_idle_thread_control_block
+	mov		eax, esi
+	shr		rsi, 32
+	mov		edx, esi
+
+	mov		ecx, IA32_FS_BASE
+	wrmsr
+
+	; -----------------------------------------------------------------------------------------------------------------
 	; -----------------------------------------------------------------------------------------------------------------
 
 	mov     rsi, txt_hello
@@ -63,33 +152,33 @@ _kernel_entrypoint:
 	; r15 will always hold the kasmos_master_list address when in kernel code.
 	; -----------------------------------------------------------------------------------------------------------------
 
-	mov		r15, _kasmos_master_list
+;	mov		r15, _kasmos_master_list
 
 	; -----------------------------------------------------------------------------------------------------------------
 	; Setup the kernel allocator data
 	; -----------------------------------------------------------------------------------------------------------------
 
-	extern	__kernel_data_buffer_start
-	extern	__kernel_data_buffer_end
+;	extern __kernel_data_buffer_start
+;	extern __kernel_data_buffer_end
 
-	lea		rdi, [r15 + kasmos_master_list.kmem]
+;	lea		rdi, [r15 + kasmos_master_list.kmem]
 
-	mov 	rax, __kernel_data_buffer_start
+;	mov 	rax, __kernel_data_buffer_start
 
-	mov		[rdi + kasmos_kmem.kmem_base], rax
-	mov		[rdi + kasmos_kmem.kmem_freebase], rax
+;	mov		[rdi + kasmos_kmem.kmem_base], rax
+;	mov		[rdi + kasmos_kmem.kmem_freebase], rax
 
-	mov		rbx, __kernel_data_buffer_end
-	sub		rbx, rax
+;	mov		rbx, __kernel_data_buffer_end
+;	sub		rbx, rax
 
-	mov		[rdi + kasmos_kmem.kmem_size], rbx
-	mov		[rdi + kasmos_kmem.kmem_avail], rbx
+;	mov		[rdi + kasmos_kmem.kmem_size], rbx
+;	mov		[rdi + kasmos_kmem.kmem_avail], rbx
 
 	; -----------------------------------------------------------------------------------------------------------------
 	; 
 	; -----------------------------------------------------------------------------------------------------------------
 
-	extern	_limine_mp_request
+	extern _limine_mp_request
 
 	mov		rsi, _limine_mp_request
 	mov		rsi, [rsi + limine_mp_request.response]
@@ -106,38 +195,6 @@ _kernel_entrypoint:
 	mul		rax, rcx
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	PUSH_ARGS	rax, rbx
-	call    .z
-	POP_ARGS
-
-
-.z  pop     rax
-	mov     cl, 16
-	call    vdebug_write_word
-	mov     rsi, cr_lf
-	call    vdebug_write_string
-
-	mov     cl, 12
-	call    vdebug_write_word
-	mov     rsi, cr_lf
-	call    vdebug_write_string
-
 	; -----------------------------------------------------------------------------------------------------------------
 	; 
 	; -----------------------------------------------------------------------------------------------------------------
@@ -150,7 +207,7 @@ _kernel_entrypoint:
 	; 
 	; -----------------------------------------------------------------------------------------------------------------
 
-	; ....
+	; TODO: call main
 
 	; -----------------------------------------------------------------------------------------------------------------
 	; 
@@ -161,9 +218,12 @@ _kernel_entrypoint:
 	call    kfini_run_all
 
 .hang:
-	BOCHS_MAGIC_BREAK
+	mov     rsi, txt_kernel_stopped
+	call    vdebug_write_string
 
 .hang_loop:
+	BOCHS_MAGIC_BREAK
+
 	hlt
 	jmp .hang_loop
 
@@ -174,8 +234,17 @@ _kernel_entrypoint:
 ; =====================================================================================================================
 
 RODATA txt_hello
-	db  'kasmos booting...'
+	db  'kasmos booting...', 10, 13, 0
 
-RODATA cr_lf
+RODATA txt_kernel_stopped
+	db	'Kernel stopped.', 10, 13, 0
+
+RODATA txt_cmdline
+	db	'Command line: ', 0
+
+RODATA txt_equal
+	db	' = ', 0
+
+RODATA txt_crlf
 	db  10, 13, 0
 

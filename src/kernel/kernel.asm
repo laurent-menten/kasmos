@@ -7,6 +7,9 @@
 
     %include "limine.inc"
 
+	%include "cpu_control_block.inc"
+	%include "thread_control_block.inc"
+
 ; =====================================================================================================================
 ; = Limine ============================================================================================================
 ; =====================================================================================================================
@@ -15,9 +18,22 @@
 
 	LIMINE_REQUESTS_START_MARKER
 
+; ---------------------------------------------------------------------------------------------------------------------
+
 	section .limine_requests
 
 	LIMINE_BASE_REVISION 3
+
+; ---------------------------------------------------------------------------------------------------------------------
+
+	global _limine_executable_command_line_request
+	global _limine_executable_command_line_request.response
+_limine_executable_command_line_request:
+	istruc limine_executable_cmdline_request
+		LIMINE_REQUEST_HEADER					LIMINE_EXECUTABLE_CMDLINE_REQUEST_2, LIMINE_EXECUTABLE_CMDLINE_REQUEST_3
+.response:
+		at limine_mp_request.response,          dq 0
+	iend
 
     global _limine_mp_request
     global _limine_mp_request.response
@@ -38,15 +54,41 @@ _limine_framebuffer_request:
 		at limine_framebuffer_request.response, dq 0
 	iend
 
+; ---------------------------------------------------------------------------------------------------------------------
+
 	section .limine_requests_end
 
 	LIMINE_REQUESTS_END_MARKER
-   
+
 ; =====================================================================================================================
-; = 
+; = BSP control blocks ================================================================================================
 ; =====================================================================================================================
 
-DATA _kasmos_master_list
-	istruc kasmos_master_list
-        at .panic_code,     dq  PANIC_CODE_NO_ERROR
+DATA _bsp_cpu_control_block
+	istruc cpu_control_block
 	iend
+
+DATA _bsp_idle_thread_control_block
+	istruc bsp_thread_control_block
+        at .foobar,     	dq  PANIC_CODE_NO_ERROR
+	iend
+
+; ---------------------------------------------------------------------------------------------------------------------
+
+%macro PARAMETER 1
+	istruc kvpair
+		at .key,			dq	%1
+		at .value,			dq 	0
+	iend
+%endmacro
+
+DATA _kernel_parameters
+	PARAMETER	_kernel_parameter_debug
+	PARAMETER	_kernel_parameter_loglevel
+	dq			0
+
+RODATA _kernel_parameter_debug
+	db "debug",0
+
+RODATA _kernel_parameter_loglevel
+	db "loglevel",0

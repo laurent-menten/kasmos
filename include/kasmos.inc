@@ -2,7 +2,7 @@
 ; === KasmOS (c)2025+ Laurent Menten (laurent.menten@gmail.com) === GNU Lesser General Public License v3.0 (LGPLv3) ===
 ; =====================================================================================================================
 
-; NOTE: this file is automaticaly included (in second position!).
+; NOTE: this file is automaticaly included (in third position!).
 ; See NASM_FLAGS definition in Makefile.rules
 
 %ifndef __KASMOS_INC__
@@ -101,67 +101,33 @@
 %endmacro
 
 ; =====================================================================================================================
-; = 
-; =====================================================================================================================
-
-%macro STRUCT 1
-	%push struc_CTX
-	%define __STRUCT_NAME %1
-	struc %1
-%endmacro
-
-%macro LINKED_STRUCT 1
-	%push struc_CTX
-	%define __STRUCT_NAME %1
-	struc %1
-		.next				resq	1
-		.prev				resq	1
-%endmacro
-
-; ---------------------------------------------------------------------------------------------------------------------
-
-%macro ENDSTRUCT 0
-	.size:
-	endstruc
-	%xdefine __STRUCT_NAME %+ _size __STRUCT_NAME %+ size
-	%undef __STRUCT_NAME
-	%pop
-%endmacro
-
-; =====================================================================================================================
-; = 
-; =====================================================================================================================
-
-STRUCT linked_list
-	.head					resq	1						; 
-	.tail					resq	1						; 
-	.count					resq	1						; 
-	.flags					resq	1						; 
-	.name					resq	1						; 
-	.spinlock				resq	1						; spinlock ou pointer
-	.owner_cpu				resw	1						; owning cpu
-	.lock_owner_cpu			resw	1						; lock owner cpu
-	.pad1					resw	1						; 
-	.pad2					resw	2						; 
-	.vtable					resq	1						; 
-ENDSTRUCT
-
-LL_FROZEN			equ		(1 << 0)
-LL_POLICY_FIFO		equ		(1 << 1)
-LL_POLICY_LIFO		equ		(0 << 1)
-LL_LOCKED_ACCESS	equ		(1 << 2)
-LL_UNLOCKED_ACCESS	equ		(0 << 2)
-LL_CPU_PRIVATE		equ		(1 << 3)
-
-LINKED_STRUCT linked_list_node
-ENDSTRUCT
-
-; =====================================================================================================================
-; = 
+; = Panic codes =======================================================================================================
 ; =====================================================================================================================
 
 %define PANIC_CODE_NO_ERROR			0x0000_0000_0000_0000
 %define PANIC_CODE_NO_MP_INFOS		0x8000_0000_0000_0001
+
+; =====================================================================================================================
+; = Kernel GDT and selectors ==========================================================================================
+; =====================================================================================================================
+
+STRUCT	kernel_gdt
+	.null					resq	1
+	.kernel_code			resq	1
+	.kernel_data			resq	1
+	.kernel_tss				resq	2
+	.user_code				resq	1
+	.user_data				resq	1
+ENDSTRUCT
+
+; ---------------------------------------------------------------------------------------------------------------------
+
+NULL_SELECTOR				equ		kernel_gdt.null
+KERNEL_CODE_SELECTOR		equ		kernel_gdt.kernel_code
+KERNEL_DATA_SELECTOR		equ		kernel_gdt.kernel_data
+KERNEL_TTS_SELECTOR			equ		kernel_gdt.kernel_tss
+USER_CODE_SELECTOR			equ		kernel_gdt.user_code
+USER_DATA_SELECTOR			equ		kernel_gdt.user_data
 
 ; =====================================================================================================================
 ; = 
@@ -187,6 +153,15 @@ STRUCT kasmos_master_list
 	.panic_code				resq	1
 	.kmem					resb	kasmos_kmem_size
 	.cpu_list				resq	1
+ENDSTRUCT
+
+; =====================================================================================================================
+; = 
+; =====================================================================================================================
+
+STRUCT kvpair
+	.key					resq	1
+	.value					resq	1
 ENDSTRUCT
 
 %endif ;__KASMOS_INC__
