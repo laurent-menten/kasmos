@@ -29,8 +29,8 @@
 	%if ENABLE_KERNEL_SYMBOLS_LIST != 0
 
 		[SECTION .kernel_symbols_data]
-		dq			FUNCTION_NAME
-		dq			FUNCTION_NAME %+ _meta
+			dq		FUNCTION_NAME
+			dq		FUNCTION_NAME %+ _meta
 
 		[SECTION .kernel_symbols_meta]
 		FUNCTION_NAME %+ _meta:
