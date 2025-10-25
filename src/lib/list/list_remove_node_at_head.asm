@@ -5,7 +5,7 @@
 	cpu     x64
 	bits    64
 
-    %include "lib/list.inc"
+    %include "lib/list_def.inc"
 
 ; =====================================================================================================================
 ; = 
@@ -43,6 +43,8 @@ FUNCTION __list_remove_node_at_head_unlocked
 .return:
 	pop		rdx
     ret
+ENDFUNCTION
 
 FUNCTION __list_remove_node_at_head_locked
     jmp     __list_remove_node_at_head_unlocked
+ENDFUNCTION

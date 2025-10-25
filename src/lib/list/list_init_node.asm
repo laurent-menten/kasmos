@@ -5,7 +5,7 @@
 	cpu     x64
 	bits    64
 
-    %include "lib/list.inc"
+    %include "lib/list_def.inc"
 
 ; =====================================================================================================================
 ; = 
@@ -17,4 +17,4 @@ FUNCTION _list_init_node
     mov     qword [rsi + linked_list_node.next], 0
     mov     qword [rsi + linked_list_node.prev], 0
     ret
-
+ENDFUNCTION

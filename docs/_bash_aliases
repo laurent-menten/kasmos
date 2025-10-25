@@ -1,0 +1,26 @@
+
+make() {
+  local rc
+  set -o pipefail
+
+  # Détection 256 couleurs -> orange sinon jaune
+  if tput colors >/dev/null 2>&1 && [ "$(tput colors)" -ge 256 ]; then
+    local ORANGE=$'\033[38;5;208m'
+  else
+    local ORANGE=$'\033[1;33m'
+  fi
+
+  local RED=$'\033[1;31m'
+  local RST=$'\033[0m'
+
+  /usr/bin/make --output-sync "$@" 2>&1 \
+  | stdbuf -oL awk -v RED="$RED" -v ORG="$ORANGE" -v RST="$RST" '
+      BEGIN { IGNORECASE=1 }
+      /error:/          { print RED $0 RST; fflush(); next }
+      /warn(ing)?:/     { print ORG $0 RST; fflush(); next }
+                        { print; fflush() }
+    '
+  rc=${PIPESTATUS[0]}
+  return $rc
+}
+

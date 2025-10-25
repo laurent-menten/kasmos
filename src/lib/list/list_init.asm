@@ -5,7 +5,7 @@
 	cpu     x64
 	bits    64
 
-    %include "lib/list.inc"
+    %include "lib/list_def.inc"
 
 ; =====================================================================================================================
 ; = 
@@ -114,6 +114,7 @@ FUNCTION _list_init
 
 .return:
     ret
+ENDFUNCTION
 
 ; =====================================================================================================================
 ; = 
@@ -125,6 +126,7 @@ FUNCTION _list_is_empty
     call    [r8 + list_vtable.is_empty]
     pop     r8
     ret
+ENDFUNCTION
 
 FUNCTION _list_add_node_at_head
     push    r8
@@ -132,6 +134,7 @@ FUNCTION _list_add_node_at_head
     call    [r8 + list_vtable.add_node_at_head]
     pop     r8
     ret
+ENDFUNCTION
 
 FUNCTION _list_add_node_at_tail
     push    r8
@@ -139,6 +142,7 @@ FUNCTION _list_add_node_at_tail
     call    [r8 + list_vtable.add_node_at_tail]
     pop     r8
     ret
+ENDFUNCTION
 
 FUNCTION _list_insert_before_node
     push    r8
@@ -146,6 +150,7 @@ FUNCTION _list_insert_before_node
     call    [r8 + list_vtable.insert_before_node]
     pop     r8
     ret
+ENDFUNCTION
 
 FUNCTION _list_insert_after_node
     push    r8
@@ -153,6 +158,7 @@ FUNCTION _list_insert_after_node
     call    [r8 + list_vtable.insert_after_node]
     pop     r8
     ret
+ENDFUNCTION
 
 FUNCTION _list_remove_node
     push    r8
@@ -160,6 +166,7 @@ FUNCTION _list_remove_node
     call    [r8 + list_vtable.remove_node]
     pop     r8
     ret
+ENDFUNCTION
 
 FUNCTION _list_remove_node_at_head
     push    r8
@@ -167,6 +174,7 @@ FUNCTION _list_remove_node_at_head
     call    [r8 + list_vtable.remove_node_at_head]
     pop     r8
     ret
+ENDFUNCTION
 
 FUNCTION _list_remove_node_at_tail
     push    r8
@@ -174,3 +182,4 @@ FUNCTION _list_remove_node_at_tail
     call    [r8 + list_vtable.remove_node_at_tail]
     pop     r8
     ret
+ENDFUNCTION

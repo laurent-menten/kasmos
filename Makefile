@@ -233,3 +233,8 @@ remove-limine:
 	-rm -f -r $(LIMINE_DIR)
 
 reinstall-limine: remove-limine install-limine
+
+# ---------------------------------------------------------------------------------------------------------------------
+
+cutter-dl:
+	wget https://github.com/rizinorg/cutter/releases/download/v2.4.1/Cutter-v2.4.1-Linux-Qt5-x86_64.AppImage -O $(KASMOS_BIN_DIR)/Cutter

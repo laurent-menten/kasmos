@@ -1,7 +1,7 @@
 
 ; strcmpz(rdi=s1, rsi=s2) -> ZF=1 si égal, ZF=0 sinon ; détruit rax
 
-FUNCTION _strcmpz
+FUNCTION _strcmp
 .loop:
 	mov al, [rdi]
 	cmp al, [rsi]

@@ -17,6 +17,7 @@
 FUNCTION vdebug_write_char
 	out BOCHS_HACK_PORT, al
 	ret
+ENDFUNCTION
 
 ; =====================================================================================================================
 ; = vdebug_write_string ===============================================================================================
@@ -47,6 +48,7 @@ FUNCTION vdebug_write_string
 	pop     rax
 	popf
 	ret
+ENDFUNCTION
 
 ; =====================================================================================================================
 ; = vdebug_write_xdigit ===============================================================================================
@@ -70,6 +72,7 @@ FUNCTION vdebug_write_xdigit
 	pop     rbx
 	pop     rax
 	ret
+ENDFUNCTION
 
 RODATA vdebug_hex_table
 	db      "0123456789ABCDEF"
@@ -79,7 +82,7 @@ RODATA vdebug_hex_table
 ; =====================================================================================================================
 ;
 ;   In:     rax     digit to be written (in hexadecimal) to VM debug port
-;           cl      x
+;          rcx      x
 ;
 ;   Out:    /
 ;
@@ -118,6 +121,7 @@ FUNCTION vdebug_write_word
 .return:
 	pop     rcx
 	ret
+ENDFUNCTION
 
 FUNCTION vdebug_write_xword
 	push    rax
@@ -133,6 +137,7 @@ FUNCTION vdebug_write_xword
 	pop     rbx
 	pop     rax
 	ret
+ENDFUNCTION
 
 FUNCTION vdebug_write_xdword
 	push    rax
@@ -148,6 +153,7 @@ FUNCTION vdebug_write_xdword
 	pop     rbx
 	pop     rax
 	ret
+ENDFUNCTION
 
 FUNCTION vdebug_write_xqword
 	push    rax
@@ -163,6 +169,7 @@ FUNCTION vdebug_write_xqword
 	pop     rbx
 	pop     rax
 	ret
+ENDFUNCTION
 
 FUNCTION vdebug_write_xtword
 	push    rax
@@ -178,3 +185,4 @@ FUNCTION vdebug_write_xtword
 	pop     rbx
 	pop     rax
 	ret
+ENDFUNCTION

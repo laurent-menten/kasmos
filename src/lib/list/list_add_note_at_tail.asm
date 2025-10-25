@@ -5,7 +5,7 @@
 	cpu     x64
 	bits    64
 
-    %include "lib/list.inc"
+    %include "lib/list_def.inc"
 
 ; =====================================================================================================================
 ; = 
@@ -38,6 +38,8 @@ FUNCTION __list_add_node_at_tail_unlocked
 
     pop     rax
     ret
+ENDFUNCTION
 
 FUNCTION __list_add_node_at_tail_locked
     jmp     __list_add_node_at_tail_unlocked
+ENDFUNCTION

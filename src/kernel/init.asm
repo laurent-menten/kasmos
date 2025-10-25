@@ -39,6 +39,7 @@ FUNCTION kinit_run_all
 .done:
     pop     rsi
     ret
+ENDFUNCTION
 
 ; =====================================================================================================================
 ; = kfini_run_all
@@ -73,3 +74,4 @@ FUNCTION kfini_run_all
 .done:
     pop     rsi
     ret
+ENDFUNCTION

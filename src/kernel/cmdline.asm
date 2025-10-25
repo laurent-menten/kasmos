@@ -110,8 +110,6 @@ FUNCTION _parse_command_line
 	; --- split and remove quotes -------------------------------------------------------------------------------------
 
 .store:
-	BOCHS_MAGIC_BREAK
-
 	cmp		r9, 0											; has equal ?
     je		.apply											; no
 
@@ -133,8 +131,6 @@ FUNCTION _parse_command_line
 ;	r9 = ptr to value or 0 if none
 
 .apply:
-	BOCHS_MAGIC_BREAK
-
 	test	r9, r9											; no value  ?
 	jnz		.check_key
 
@@ -183,6 +179,7 @@ FUNCTION _parse_command_line
 	pop	rbx
 	pop	rax
     ret
+ENDFUNCTION
 
 RODATA _value_1
 	db	'1', 0

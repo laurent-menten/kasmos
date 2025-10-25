@@ -5,7 +5,7 @@
 	cpu     x64
 	bits    64
 
-    %include "lib/list.inc"
+    %include "lib/list_def.inc"
 
 ; =====================================================================================================================
 ; = 
@@ -58,6 +58,8 @@ FUNCTION __list_remove_node_unlocked
     xor     eax, eax
     pop     rdx
     ret
+ENDFUNCTION
 
 FUNCTION __list_remove_node_locked
     jmp     __list_remove_node_unlocked
+ENDFUNCTION

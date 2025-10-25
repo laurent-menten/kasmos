@@ -22,7 +22,7 @@ KERNEL_DATA_BUFFER_SIZE = 512K
 
 KERNEL_TMP_FILE = $(KASMOS_BUILD_DIR)/kernel.tmp.elf
 
-LIBS = -llist -lstrings
+LIBS = -lconcurrency -llist -lstrings
 
 $(KERNEL_FILE): $(OBJS)
 	$(LLVM_LD_EXE) \

@@ -72,6 +72,7 @@ FUNCTION _list_debug_dump
 	pop		rcx
 	pop		rax
     ret
+ENDFUNCTION
 
 RODATA text_0
 	db	' : (h=', 0

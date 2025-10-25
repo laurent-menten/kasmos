@@ -54,8 +54,8 @@
 
 	section .text    
 
-	global _kernel_entrypoint
-_kernel_entrypoint:
+FUNCTION _kernel_entrypoint
+
 	BOCHS_MAGIC_BREAK
 
 	extern _limine_executable_command_line_request.response
@@ -108,6 +108,12 @@ _kernel_entrypoint:
 	jmp		.params_loop
 
 .skip_command_line:
+
+	extern _ksym_sort
+	extern _ksym_dump
+
+	call	_ksym_sort
+	call	_ksym_dump
 
 	; -----------------------------------------------------------------------------------------------------------------
 	; Setup GS: base addresses for the BSP (BootStrap Processor) control block
@@ -227,7 +233,7 @@ _kernel_entrypoint:
 	hlt
 	jmp .hang_loop
 
-	section .data
+ENDFUNCTION
 
 ; =====================================================================================================================
 ; = 
@@ -241,6 +247,9 @@ RODATA txt_kernel_stopped
 
 RODATA txt_cmdline
 	db	'Command line: ', 0
+
+RODATA txt_symbols
+	db	10, 13, 'Sorted symbols: ', 0
 
 RODATA txt_equal
 	db	' = ', 0

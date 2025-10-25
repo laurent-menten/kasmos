@@ -19,7 +19,7 @@
 STRUCT cpu_control_block
 	.apic_id					resd    1					;
 	.xxx						resw	1
-	.idt_descriptor				resb	idt_descriptor_64.size
+	.idt_descriptor				resb	SIZEOF( idt_descriptor_64 )
 
 	.user:
 ENDSTRUCT

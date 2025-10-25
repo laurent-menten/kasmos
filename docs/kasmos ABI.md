@@ -23,11 +23,10 @@ RFlags should be preserved when non conditions flags are modified (DF, IF etc.).
 - **rsi** and **rdi** are used for pointer (source / destination).
 - **r8** .. **r14** are have no conventional usage.
 
-- **r14** is **ALWAYS** the *cpu_data_block* pointer for the corrent processor.
-- **r15** is **ALWAYS** the *kasmos_master_list* pointer.
-
 - **rax** is the dedicated register for primary return value or a return code.
 - Secondary return values should be written using pointers
 
 Only variadic routine will used the stack for arguments passing and only for the optional arguments. In this case, **rcx** is expected to contain the count of arguments. Stack cleanup is the responsability of the caller.
 
+
+- **r15** is always used as the pointer to the lock structure for concurrency functions

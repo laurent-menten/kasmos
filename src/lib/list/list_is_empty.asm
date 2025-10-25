@@ -5,7 +5,7 @@
 	cpu     x64
 	bits    64
 
-    %include "lib/list.inc"
+    %include "lib/list_def.inc"
 
 ; =====================================================================================================================
 ; = 
@@ -19,6 +19,8 @@ FUNCTION __list_is_empty_unlocked
     and     rax, rax
     setz    rax
     ret
+ENDFUNCTION
 
 FUNCTION __list_is_empty_locked
     jmp     __list_is_empty_unlocked
+ENDFUNCTION
